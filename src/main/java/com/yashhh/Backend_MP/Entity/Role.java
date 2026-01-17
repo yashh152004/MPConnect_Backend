@@ -6,5 +6,6 @@ public enum Role {
     PA,
     MP,
     CITIZEN
+    
 }
 
