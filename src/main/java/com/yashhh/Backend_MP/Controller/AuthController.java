@@ -1,42 +1,34 @@
 package com.yashhh.Backend_MP.Controller;
 
-import com.yashhh.Backend_MP.Entity.User;
-import com.yashhh.Backend_MP.Repository.UserRepository;
-import com.yashhh.Backend_MP.Security.JwtUtil;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
 import java.util.Map;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.yashhh.Backend_MP.Dto.LoginRequest;
+import com.yashhh.Backend_MP.Security.AuthService;
 
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
 
-    private final UserRepository userRepository;
-    private final JwtUtil jwtUtil;
+    private final AuthService authService;
 
-    public AuthController(UserRepository userRepository, JwtUtil jwtUtil) {
-        this.userRepository = userRepository;
-        this.jwtUtil = jwtUtil;
+    public AuthController(AuthService authService) {
+        this.authService = authService;
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody User request) {
+    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
 
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        if (!user.getPassword().equals(request.getPassword())) {
-            return ResponseEntity.status(401).body("Invalid credentials");
-        }
-
-        String token = jwtUtil.generateToken(
-                user.getEmail(),
-                user.getRole().name()
+        String token = authService.login(
+                request.getEmail(),
+                request.getPassword()
         );
 
-        return ResponseEntity.ok(
-                Map.of("token", token)
-        );
+        return ResponseEntity.ok(Map.of("token", token));
     }
 }
