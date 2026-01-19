@@ -1,13 +1,12 @@
 package com.yashhh.Backend_MP.Security;
 
-import com.yashhh.Backend_MP.Entity.User;
-import com.yashhh.Backend_MP.Repository.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
+import com.yashhh.Backend_MP.Entity.User;
+import com.yashhh.Backend_MP.Repository.UserRepository;
 
 @Service
 public class CustomUserDetailsService implements UserDetailsService {

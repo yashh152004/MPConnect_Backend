@@ -1,11 +1,12 @@
 package com.yashhh.Backend_MP.Service;
 
-import com.yashhh.Backend_MP.Entity.User;
-import com.yashhh.Backend_MP.Repository.UserRepository;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Optional;
+
+import org.springframework.stereotype.Service;
+
+import com.yashhh.Backend_MP.Entity.User;
+import com.yashhh.Backend_MP.Repository.UserRepository;
 
 @Service
 public class UserService {

@@ -4,30 +4,37 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "tour_packages")
+@Table(name = "destinations")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class TourPackage {
+public class Destination {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
-    private String packageName;
+    private String locationName;
+
+    @Column(nullable = false)
+    private String district;
+
+    private String block;
+    private String village;
 
     @Column(columnDefinition = "TEXT")
-    private String description;
+    private String address;
 
-    private Double typicalDurationHours;
+    private Double latitude;
+    private Double longitude;
+
+    private String contactPersonName;
+    private String contactPersonPhone;
 
     @Column(columnDefinition = "TEXT")
-    private String standardActivities;
-
-    @Column(columnDefinition = "TEXT")
-    private String requiredResources;
+    private String accessibilityInfo;
 
     @ManyToOne
     @JoinColumn(name = "created_by", nullable = false)
