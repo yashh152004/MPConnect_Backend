@@ -4,19 +4,11 @@ import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.yashhh.Backend_MP.Entity.Complaint;
-import com.yashhh.Backend_MP.Entity.User;
+import com.yashhh.Backend_MP.Entity.ComplaintStatus;
 import com.yashhh.Backend_MP.Service.ComplaintService;
 
 @RestController
@@ -35,11 +27,11 @@ public class ComplaintController {
     @PreAuthorize("hasRole('CITIZEN')")
     @PostMapping
     public ResponseEntity<Complaint> createComplaint(
-            @RequestBody Complaint complaint,
-            @AuthenticationPrincipal User citizen) {
+            @RequestParam Long citizenId,
+            @RequestBody Complaint complaint) {
 
         return ResponseEntity.ok(
-                complaintService.createComplaint(complaint, citizen)
+                complaintService.createComplaint(complaint, citizenId)
         );
     }
 
@@ -58,15 +50,15 @@ public class ComplaintController {
     }
 
     // =========================================================
-    // 🔵 CITIZEN: VIEW OWN COMPLAINTS
+    // 🟢 CITIZEN: VIEW OWN COMPLAINTS
     // =========================================================
     @PreAuthorize("hasRole('CITIZEN')")
-    @GetMapping("/my")
+    @GetMapping("/my/{citizenId}")
     public ResponseEntity<List<Complaint>> getMyComplaints(
-            @AuthenticationPrincipal User citizen) {
+            @PathVariable Long citizenId) {
 
         return ResponseEntity.ok(
-                complaintService.getComplaintsByCitizen(citizen.getId())
+                complaintService.getComplaintsByCitizen(citizenId)
         );
     }
 
@@ -84,23 +76,22 @@ public class ComplaintController {
     // =========================================================
     // 🟠 MP / STAFF: UPDATE COMPLAINT STATUS
     // =========================================================
-    @PreAuthorize("hasAnyRole('MP','STAFF')")
-@PutMapping("/{id}/status")
-@PreAuthorize("hasAnyRole('STAFF','MP')")
-public ResponseEntity<Complaint> updateStatus(
-        @PathVariable Long id,
-        @RequestParam String status) {
+    @PreAuthorize("hasAnyRole('STAFF','MP')")
+    @PutMapping("/{id}/status")
+    public ResponseEntity<Complaint> updateStatus(
+            @PathVariable Long id,
+            @RequestParam String status) {
 
-    ComplaintStatus complaintStatus;
+        ComplaintStatus complaintStatus;
 
-    try {
-        complaintStatus = ComplaintStatus.valueOf(status.toUpperCase());
-    } catch (IllegalArgumentException e) {
-        return ResponseEntity.badRequest()
-                .body(null);
+        try {
+            complaintStatus = ComplaintStatus.valueOf(status.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        return ResponseEntity.ok(
+                complaintService.updateStatus(id, complaintStatus)
+        );
     }
-
-    return ResponseEntity.ok(
-            complaintService.updateStatus(id, complaintStatus)
-    );
 }

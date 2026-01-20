@@ -1,6 +1,5 @@
 package com.yashhh.Backend_MP.Service;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -11,53 +10,71 @@ import com.yashhh.Backend_MP.Entity.Complaint;
 import com.yashhh.Backend_MP.Entity.ComplaintStatus;
 import com.yashhh.Backend_MP.Entity.User;
 import com.yashhh.Backend_MP.Repository.ComplaintRepository;
+import com.yashhh.Backend_MP.Repository.UserRepository;
 
 @Service
 public class ComplaintService {
 
     private final ComplaintRepository complaintRepository;
+    private final UserRepository userRepository;   // ✅ ADD THIS
 
-    public ComplaintService(ComplaintRepository complaintRepository) {
+    public ComplaintService(ComplaintRepository complaintRepository,
+                            UserRepository userRepository) {
         this.complaintRepository = complaintRepository;
+        this.userRepository = userRepository;
     }
 
+    // ===================================================
     // Citizen creates complaint
-    public Complaint createComplaint(Complaint complaint, User citizen) {
+    // ===================================================
+    public Complaint createComplaint(Complaint complaint, Long citizenId) {
+
+        User citizen = userRepository.findById(citizenId)
+                .orElseThrow(() -> new RuntimeException("Citizen not found"));
+
         complaint.setCreatedBy(citizen);
         complaint.setStatus(ComplaintStatus.OPEN);
         complaint.setCreatedAt(LocalDateTime.now());
+
         return complaintRepository.save(complaint);
     }
 
-    // Citizen uploads evidence (photo/pdf)
-    public Complaint uploadEvidence(Long complaintId, MultipartFile file) {
+    // ===================================================
+    // Upload evidence (photo / pdf)
+    // ===================================================
+    public Complaint uploadEvidence(Long complaintId, MultipartFile file) throws Exception {
+
         Complaint complaint = complaintRepository.findById(complaintId)
                 .orElseThrow(() -> new RuntimeException("Complaint not found"));
 
-        try {
-            complaint.setEvidence(file.getBytes());
-            complaint.setEvidenceType(file.getContentType());
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to upload evidence");
-        }
+        complaint.setEvidence(file.getBytes());
+        complaint.setEvidenceType(file.getContentType());
 
         return complaintRepository.save(complaint);
     }
 
-    // Citizen view own complaints
+    // ===================================================
+    // Citizen views own complaints
+    // ===================================================
     public List<Complaint> getComplaintsByCitizen(Long userId) {
         return complaintRepository.findByCreatedById(userId);
     }
 
-    // Staff / MP view all complaints
+    // ===================================================
+    // MP / STAFF view all complaints
+    // ===================================================
     public List<Complaint> getAllComplaints() {
         return complaintRepository.findAll();
     }
 
-    // Update status
+    // ===================================================
+    // Update complaint status
+    // ===================================================
     public Complaint updateStatus(Long id, ComplaintStatus status) {
+
         Complaint complaint = complaintRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Complaint not found"));
+
         complaint.setStatus(status);
         return complaintRepository.save(complaint);
     }
