@@ -1,9 +1,11 @@
 package com.yashhh.Backend_MP.Service;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.yashhh.Backend_MP.Entity.Complaint;
 import com.yashhh.Backend_MP.Entity.ComplaintStatus;
@@ -27,12 +29,27 @@ public class ComplaintService {
         return complaintRepository.save(complaint);
     }
 
+    // Citizen uploads evidence (photo/pdf)
+    public Complaint uploadEvidence(Long complaintId, MultipartFile file) {
+        Complaint complaint = complaintRepository.findById(complaintId)
+                .orElseThrow(() -> new RuntimeException("Complaint not found"));
+
+        try {
+            complaint.setEvidence(file.getBytes());
+            complaint.setEvidenceType(file.getContentType());
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to upload evidence");
+        }
+
+        return complaintRepository.save(complaint);
+    }
+
     // Citizen view own complaints
     public List<Complaint> getComplaintsByCitizen(Long userId) {
         return complaintRepository.findByCreatedById(userId);
     }
 
-    // Staff/MP view all complaints
+    // Staff / MP view all complaints
     public List<Complaint> getAllComplaints() {
         return complaintRepository.findAll();
     }

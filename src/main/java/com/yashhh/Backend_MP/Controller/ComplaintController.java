@@ -1,16 +1,23 @@
 package com.yashhh.Backend_MP.Controller;
 
-import com.yashhh.Backend_MP.Entity.Complaint;
-import com.yashhh.Backend_MP.Entity.User;
-import com.yashhh.Backend_MP.Service.ComplaintService;
+import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
+import com.yashhh.Backend_MP.Entity.Complaint;
+import com.yashhh.Backend_MP.Entity.User;
+import com.yashhh.Backend_MP.Service.ComplaintService;
 
 @RestController
 @RequestMapping("/api/complaints")
@@ -78,13 +85,22 @@ public class ComplaintController {
     // 🟠 MP / STAFF: UPDATE COMPLAINT STATUS
     // =========================================================
     @PreAuthorize("hasAnyRole('MP','STAFF')")
-    @PutMapping("/{id}/status")
-    public ResponseEntity<Complaint> updateStatus(
-            @PathVariable Long id,
-            @RequestParam String status) {
+@PutMapping("/{id}/status")
+@PreAuthorize("hasAnyRole('STAFF','MP')")
+public ResponseEntity<Complaint> updateStatus(
+        @PathVariable Long id,
+        @RequestParam String status) {
 
-        return ResponseEntity.ok(
-                complaintService.updateStatus(id, status)
-        );
+    ComplaintStatus complaintStatus;
+
+    try {
+        complaintStatus = ComplaintStatus.valueOf(status.toUpperCase());
+    } catch (IllegalArgumentException e) {
+        return ResponseEntity.badRequest()
+                .body(null);
     }
+
+    return ResponseEntity.ok(
+            complaintService.updateStatus(id, complaintStatus)
+    );
 }
