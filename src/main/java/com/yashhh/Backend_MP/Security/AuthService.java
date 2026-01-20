@@ -3,33 +3,33 @@ package com.yashhh.Backend_MP.Security;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Service;
+
 @Service
 public class AuthService {
 
     private final AuthenticationManager authenticationManager;
-    private final JwtUtil jwtUtil;
+    private final JwtService jwtService;
 
-    public AuthService(AuthenticationManager authenticationManager, JwtUtil jwtUtil) {
+    public AuthService(AuthenticationManager authenticationManager,
+                       JwtService jwtService) {
         this.authenticationManager = authenticationManager;
-        this.jwtUtil = jwtUtil;
+        this.jwtService = jwtService;
     }
 
     public String login(String email, String password) {
 
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(email, password)
-        );
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(email, password)
+            );
 
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            // If authentication successful → generate JWT
+            return jwtService.generateToken(authentication.getName());
 
-        String role = userDetails.getAuthorities()
-                .iterator()
-                .next()
-                .getAuthority()
-                .replace("ROLE_", "");
-
-        return jwtUtil.generateToken(userDetails.getUsername(), role);
+        } catch (AuthenticationException e) {
+            throw new RuntimeException("Invalid email or password");
+        }
     }
 }
