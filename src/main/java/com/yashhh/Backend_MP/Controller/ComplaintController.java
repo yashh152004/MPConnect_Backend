@@ -2,8 +2,10 @@ package com.yashhh.Backend_MP.Controller;
 
 import java.util.List;
 
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -22,43 +24,49 @@ public class ComplaintController {
     }
 
     // =========================================================
-    // 🟢 CITIZEN: CREATE COMPLAINT
+    // 🟢 CITIZEN: CREATE COMPLAINT (JWT BASED)
     // =========================================================
     @PreAuthorize("hasRole('CITIZEN')")
     @PostMapping
     public ResponseEntity<Complaint> createComplaint(
-            @RequestParam Long citizenId,
-            @RequestBody Complaint complaint) {
+            @RequestBody Complaint complaint,
+            Authentication authentication) {
+
+        String email = authentication.getName();
 
         return ResponseEntity.ok(
-                complaintService.createComplaint(complaint, citizenId)
+                complaintService.createComplaintForLoggedInCitizen(complaint, email)
         );
     }
 
     // =========================================================
-    // 🟢 CITIZEN: UPLOAD EVIDENCE (PHOTO / PDF)
+    // 🟢 CITIZEN: UPLOAD EVIDENCE (PHOTO / PDF / NEWSPAPER)
     // =========================================================
     @PreAuthorize("hasRole('CITIZEN')")
-    @PostMapping("/{complaintId}/evidence")
-    public ResponseEntity<Complaint> uploadEvidence(
+    @PostMapping(
+        value = "/{complaintId}/evidence",
+        consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
+    public ResponseEntity<String> uploadEvidence(
             @PathVariable Long complaintId,
             @RequestParam("file") MultipartFile file) throws Exception {
 
-        return ResponseEntity.ok(
-                complaintService.uploadEvidence(complaintId, file)
-        );
+        complaintService.uploadEvidence(complaintId, file);
+        return ResponseEntity.ok("Evidence uploaded successfully");
     }
 
     // =========================================================
     // 🟢 CITIZEN: VIEW OWN COMPLAINTS
     // =========================================================
     @PreAuthorize("hasRole('CITIZEN')")
-    @GetMapping("/my/{citizenId}")
+    @GetMapping("/my")
     public ResponseEntity<List<Complaint>> getMyComplaints(
-            @PathVariable Long citizenId) {
+            Authentication authentication) {
+
+        String email = authentication.getName();
 
         return ResponseEntity.ok(
-                complaintService.getComplaintsByCitizen(citizenId)
+                complaintService.getComplaintsForLoggedInCitizen(email)
         );
     }
 
@@ -76,7 +84,7 @@ public class ComplaintController {
     // =========================================================
     // 🟠 MP / STAFF: UPDATE COMPLAINT STATUS
     // =========================================================
-    @PreAuthorize("hasAnyRole('STAFF','MP')")
+    @PreAuthorize("hasAnyRole('MP','STAFF')")
     @PutMapping("/{id}/status")
     public ResponseEntity<Complaint> updateStatus(
             @PathVariable Long id,

@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.yashhh.Backend_MP.Entity.Complaint;
@@ -16,20 +17,26 @@ import com.yashhh.Backend_MP.Repository.UserRepository;
 public class ComplaintService {
 
     private final ComplaintRepository complaintRepository;
-    private final UserRepository userRepository;   // ✅ ADD THIS
+    private final UserRepository userRepository;
+    private final ComplaintEvidenceService evidenceService;
 
-    public ComplaintService(ComplaintRepository complaintRepository,
-                            UserRepository userRepository) {
+    public ComplaintService(
+            ComplaintRepository complaintRepository,
+            UserRepository userRepository,
+            ComplaintEvidenceService evidenceService) {
+
         this.complaintRepository = complaintRepository;
         this.userRepository = userRepository;
+        this.evidenceService = evidenceService;
     }
 
-    // ===================================================
-    // Citizen creates complaint
-    // ===================================================
-    public Complaint createComplaint(Complaint complaint, Long citizenId) {
+    // =========================================================
+    // CREATE COMPLAINT (LOGGED-IN CITIZEN)
+    // =========================================================
+    public Complaint createComplaintForLoggedInCitizen(
+            Complaint complaint, String email) {
 
-        User citizen = userRepository.findById(citizenId)
+        User citizen = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Citizen not found"));
 
         complaint.setCreatedBy(citizen);
@@ -39,37 +46,39 @@ public class ComplaintService {
         return complaintRepository.save(complaint);
     }
 
-    // ===================================================
-    // Upload evidence (photo / pdf)
-    // ===================================================
-    public Complaint uploadEvidence(Long complaintId, MultipartFile file) throws Exception {
+    // =========================================================
+    // UPLOAD EVIDENCE
+    // =========================================================
+    @Transactional
+    public void uploadEvidence(Long complaintId, MultipartFile file) throws Exception {
 
         Complaint complaint = complaintRepository.findById(complaintId)
                 .orElseThrow(() -> new RuntimeException("Complaint not found"));
 
-        complaint.setEvidence(file.getBytes());
-        complaint.setEvidenceType(file.getContentType());
-
-        return complaintRepository.save(complaint);
+        evidenceService.uploadEvidence(complaint, file);
     }
 
-    // ===================================================
-    // Citizen views own complaints
-    // ===================================================
-    public List<Complaint> getComplaintsByCitizen(Long userId) {
-        return complaintRepository.findByCreatedById(userId);
+    // =========================================================
+    // GET LOGGED-IN CITIZEN COMPLAINTS
+    // =========================================================
+    public List<Complaint> getComplaintsForLoggedInCitizen(String email) {
+
+        User citizen = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Citizen not found"));
+
+return complaintRepository.findByCreatedBy(citizen);
     }
 
-    // ===================================================
-    // MP / STAFF view all complaints
-    // ===================================================
+    // =========================================================
+    // GET ALL COMPLAINTS
+    // =========================================================
     public List<Complaint> getAllComplaints() {
         return complaintRepository.findAll();
     }
 
-    // ===================================================
-    // Update complaint status
-    // ===================================================
+    // =========================================================
+    // UPDATE STATUS
+    // =========================================================
     public Complaint updateStatus(Long id, ComplaintStatus status) {
 
         Complaint complaint = complaintRepository.findById(id)

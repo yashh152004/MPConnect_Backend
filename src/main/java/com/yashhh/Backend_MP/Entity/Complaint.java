@@ -1,7 +1,11 @@
 package com.yashhh.Backend_MP.Entity;
 
 import java.time.LocalDateTime;
+import jakarta.persistence.OneToMany;
+import java.util.ArrayList;
+import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -46,6 +50,9 @@ private byte[] evidence;
 private String evidenceType;
 
     @ManyToOne
-    @JoinColumn(name = "created_by")
+    @JoinColumn(name = "created_by", nullable = false)
     private User createdBy;
+
+    @OneToMany(mappedBy = "complaint", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ComplaintEvidence> evidences = new ArrayList<>();
 }
