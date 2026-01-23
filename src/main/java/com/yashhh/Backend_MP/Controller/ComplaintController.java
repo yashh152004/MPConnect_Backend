@@ -1,6 +1,7 @@
 package com.yashhh.Backend_MP.Controller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -35,18 +36,14 @@ public class ComplaintController {
         String email = authentication.getName();
 
         return ResponseEntity.ok(
-                complaintService.createComplaintForLoggedInCitizen(complaint, email)
-        );
+                complaintService.createComplaintForLoggedInCitizen(complaint, email));
     }
 
     // =========================================================
     // 🟢 CITIZEN: UPLOAD EVIDENCE (PHOTO / PDF / NEWSPAPER)
     // =========================================================
     @PreAuthorize("hasRole('CITIZEN')")
-    @PostMapping(
-        value = "/{complaintId}/evidence",
-        consumes = MediaType.MULTIPART_FORM_DATA_VALUE
-    )
+    @PostMapping(value = "/{complaintId}/evidence", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> uploadEvidence(
             @PathVariable Long complaintId,
             @RequestParam("file") MultipartFile file) throws Exception {
@@ -66,8 +63,7 @@ public class ComplaintController {
         String email = authentication.getName();
 
         return ResponseEntity.ok(
-                complaintService.getComplaintsForLoggedInCitizen(email)
-        );
+                complaintService.getComplaintsForLoggedInCitizen(email));
     }
 
     // =========================================================
@@ -77,8 +73,7 @@ public class ComplaintController {
     @GetMapping
     public ResponseEntity<List<Complaint>> getAllComplaints() {
         return ResponseEntity.ok(
-                complaintService.getAllComplaints()
-        );
+                complaintService.getAllComplaints());
     }
 
     // =========================================================
@@ -99,7 +94,19 @@ public class ComplaintController {
         }
 
         return ResponseEntity.ok(
-                complaintService.updateStatus(id, complaintStatus)
-        );
+                complaintService.updateStatus(id, complaintStatus));
+    }
+
+    // =====================================================
+    // 🔒 MP / PA / STAFF → TOTAL COMPLAINT COUNT
+    // =====================================================
+    @PreAuthorize("hasAnyRole('MP','PA','STAFF')")
+    @GetMapping("/count")
+    public ResponseEntity<?> getTotalComplaints() {
+
+        long total = complaintService.getTotalComplaints();
+
+        return ResponseEntity.ok(
+                Map.of("totalComplaints", total));
     }
 }

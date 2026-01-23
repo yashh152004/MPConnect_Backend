@@ -66,7 +66,7 @@ public class ComplaintService {
         User citizen = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Citizen not found"));
 
-return complaintRepository.findByCreatedBy(citizen);
+        return complaintRepository.findByCreatedBy(citizen);
     }
 
     // =========================================================
@@ -86,5 +86,9 @@ return complaintRepository.findByCreatedBy(citizen);
 
         complaint.setStatus(status);
         return complaintRepository.save(complaint);
+    }
+
+    public long getTotalComplaints() {
+        return complaintRepository.count();
     }
 }
