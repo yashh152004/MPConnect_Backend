@@ -1,36 +1,64 @@
 package com.yashhh.Backend_MP.Service;
 
-import org.springframework.stereotype.Service;
+import java.nio.file.*;
+import java.time.LocalDate;
 
-import com.yashhh.Backend_MP.Entity.Tour;
-import com.yashhh.Backend_MP.Entity.TourDestination;
-import com.yashhh.Backend_MP.Repository.TourDestinationRepository;
-import com.yashhh.Backend_MP.Repository.TourRepository;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.yashhh.Backend_MP.Entity.*;
+import com.yashhh.Backend_MP.Repository.*;
 
 @Service
 public class TourService {
 
-    private final TourRepository tourRepository;
-    private final TourDestinationRepository tourDestinationRepository;
+    private final TourRepository tourRepo;
+    private final TourMediaRepository mediaRepo;
+    private final UserRepository userRepo;
 
-    public TourService(TourRepository tourRepository,
-                       TourDestinationRepository tourDestinationRepository) {
-        this.tourRepository = tourRepository;
-        this.tourDestinationRepository = tourDestinationRepository;
+    private final String UPLOAD_DIR = "uploads/tours/";
+
+    public TourService(TourRepository tourRepo,
+            TourMediaRepository mediaRepo,
+            UserRepository userRepo) {
+        this.tourRepo = tourRepo;
+        this.mediaRepo = mediaRepo;
+        this.userRepo = userRepo;
     }
 
-    // ✅ MAP TOUR TO DESTINATION
-    public TourDestination mapTourToDestination(TourDestination tourDestination) {
-        return tourDestinationRepository.save(tourDestination);
-    }
-
-    // ✅ CREATE TOUR
+    // 🟢 Create Tour (MP / PA / STAFF)
     public Tour createTour(Tour tour) {
-        return tourRepository.save(tour);
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User user = userRepo.findByEmail(auth.getName()).orElseThrow();
+
+        tour.setCreatedBy(user);
+        tour.setTourDate(LocalDate.now());
+
+        return tourRepo.save(tour);
     }
 
-    // ✅ GET ALL TOURS
-    public java.util.List<Tour> getAllTours() {
-        return tourRepository.findAll();
+    // 🟢 Upload media per tour
+    public TourMedia uploadMedia(Long tourId, MultipartFile file, MediaType type) throws Exception {
+
+        Tour tour = tourRepo.findById(tourId)
+                .orElseThrow(() -> new RuntimeException("Tour not found"));
+
+        Files.createDirectories(Paths.get(UPLOAD_DIR));
+
+        String path = UPLOAD_DIR + System.currentTimeMillis() + "_" + file.getOriginalFilename();
+        Files.copy(file.getInputStream(), Paths.get(path));
+
+        TourMedia media = TourMedia.builder()
+                .fileName(file.getOriginalFilename())
+                .fileType(file.getContentType())
+                .filePath(path)
+                .mediaType(type)
+                .tour(tour)
+                .build();
+
+        return mediaRepo.save(media);
     }
 }
