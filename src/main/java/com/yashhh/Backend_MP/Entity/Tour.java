@@ -1,17 +1,13 @@
 package com.yashhh.Backend_MP.Entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import java.time.LocalDate;
+import java.util.List;
+
+import jakarta.persistence.*;
+import lombok.*;
 
 @Entity
+@Table(name = "tours")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -23,10 +19,19 @@ public class Tour {
     private Long id;
 
     private String title;
-    private String description;
-    private Integer dayNumber;
 
+    @Column(length = 2000)
+    private String description;
+
+    private String location;
+
+    private LocalDate tourDate;
+
+    // MP / PA / STAFF who created it
     @ManyToOne
-    @JoinColumn(name = "package_id")
-    private TourPackage tourPackage;
+    @JoinColumn(name = "created_by")
+    private User createdBy;
+
+    @OneToMany(mappedBy = "tour", cascade = CascadeType.ALL)
+    private List<TourMedia> media;
 }
