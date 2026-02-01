@@ -27,12 +27,24 @@ public class SecurityConfig {
 
         http
             .csrf(csrf -> csrf.disable())
+
             .sessionManagement(session ->
-                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            )
+
             .authorizeHttpRequests(auth -> auth
+                // ✅ Auth endpoints
                 .requestMatchers("/api/auth/**").permitAll()
+
+                // ✅ Daybook access control
+                .requestMatchers("/api/daybook/**")
+                    .hasAnyRole("MP", "PA", "STAFF")
+
+                // ✅ Everything else needs login
                 .anyRequest().authenticated()
             )
+
+            // ✅ JWT filter
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

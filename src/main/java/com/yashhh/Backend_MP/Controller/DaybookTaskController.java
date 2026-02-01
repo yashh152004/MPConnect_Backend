@@ -1,8 +1,10 @@
 package com.yashhh.Backend_MP.Controller;
 
+import java.security.Principal;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,6 +17,7 @@ import com.yashhh.Backend_MP.Service.DaybookTaskService;
 
 @RestController
 @RequestMapping("/api/daybook")
+@PreAuthorize("hasAnyRole('MP','PA','STAFF')")
 public class DaybookTaskController {
 
     private final DaybookTaskService daybookService;
@@ -23,27 +26,30 @@ public class DaybookTaskController {
         this.daybookService = daybookService;
     }
 
-    // 🔹 CREATE DAYBOOK TASK (Plan Today)
-    @PostMapping("/create/{userId}")
+    // CREATE TASK (current logged-in user)
+    @PostMapping("/create")
     public ResponseEntity<DaybookTask> createTask(
             @RequestBody DaybookTask task,
-            @PathVariable Long userId) {
+            Principal principal) {
 
-        DaybookTask savedTask = daybookService.createTask(task, userId);
-        return ResponseEntity.ok(savedTask);
+        return ResponseEntity.ok(
+                daybookService.createTask(task, principal.getName())
+        );
     }
 
-    // 🔹 VIEW ALL TASKS (MP / PA / STAFF)
+    // VIEW ALL TASKS
     @GetMapping("/all")
     public ResponseEntity<List<DaybookTask>> getAllTasks() {
         return ResponseEntity.ok(daybookService.getAllTasks());
     }
 
-    // 🔹 VIEW TASKS BY USER (Audit trail)
+    // VIEW BY USER
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<DaybookTask>> getTasksByUser(
             @PathVariable Long userId) {
 
-        return ResponseEntity.ok(daybookService.getTasksByUser(userId));
+        return ResponseEntity.ok(
+                daybookService.getTasksByUser(userId)
+        );
     }
 }

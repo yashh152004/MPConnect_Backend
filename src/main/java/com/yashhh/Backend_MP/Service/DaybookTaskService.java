@@ -9,7 +9,6 @@ import com.yashhh.Backend_MP.Entity.DaybookTask;
 import com.yashhh.Backend_MP.Entity.User;
 import com.yashhh.Backend_MP.Repository.DaybookTaskRepository;
 import com.yashhh.Backend_MP.Repository.UserRepository;
-
 @Service
 public class DaybookTaskService {
 
@@ -22,10 +21,10 @@ public class DaybookTaskService {
         this.userRepository = userRepository;
     }
 
-    // CREATE DAYBOOK TASK
-    public DaybookTask createTask(DaybookTask task, Long userId) {
+    // ✅ CREATE DAYBOOK TASK (JWT EMAIL)
+    public DaybookTask createTask(DaybookTask task, String email) {
 
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         task.setCreatedBy(user);
@@ -34,12 +33,12 @@ public class DaybookTaskService {
         return daybookRepository.save(task);
     }
 
-    // VIEW ALL TASKS (MP / PA / STAFF)
+    // ✅ VIEW ALL TASKS
     public List<DaybookTask> getAllTasks() {
         return daybookRepository.findAll();
     }
 
-    // VIEW TASKS CREATED BY USER
+    // ✅ VIEW TASKS BY USER (AUDIT)
     public List<DaybookTask> getTasksByUser(Long userId) {
 
         User user = userRepository.findById(userId)
