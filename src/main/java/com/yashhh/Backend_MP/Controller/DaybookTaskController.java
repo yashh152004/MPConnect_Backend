@@ -36,7 +36,7 @@ public class DaybookTaskController {
                 daybookService.createTask(task, principal.getName())
         );
     }
-
+   
     // VIEW ALL TASKS
     @GetMapping("/all")
     public ResponseEntity<List<DaybookTask>> getAllTasks() {
