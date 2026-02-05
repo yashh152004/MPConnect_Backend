@@ -1,5 +1,8 @@
 package com.yashhh.Backend_MP.Entity;
 
+import java.sql.Blob;
+import java.time.LocalDate;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -35,4 +38,8 @@ public class DaybookAttachment {
     @ManyToOne
     @JoinColumn(name = "task_id")
     private DaybookTask task;
+
+    private Blob voice_note;
+
+    private LocalDate taskDate;
 }
