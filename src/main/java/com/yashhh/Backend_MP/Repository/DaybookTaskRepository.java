@@ -15,4 +15,12 @@ public interface DaybookTaskRepository extends JpaRepository<DaybookTask, Long> 
 
     // View tasks for a particular date
     List<DaybookTask> findByTaskDate(LocalDate taskDate);
+
+
+    List<DaybookTask> findByTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
+            String title,
+            String description
+    );
 }
+
+
