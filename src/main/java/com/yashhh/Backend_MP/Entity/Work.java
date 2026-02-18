@@ -1,9 +1,6 @@
 package com.yashhh.Backend_MP.Entity;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -14,26 +11,17 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "users")
+@Table(name = "works")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class User {
-
+public class Work {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(unique = true)
-    private String email;
-
-    private String password;
-
-    private String name; // added for frontend display
-
-    private String constituency; // optional field used by docs
-
-    @Enumerated(EnumType.STRING)
-    private Role role;
+    private String title;
+    private String status;
+    private String village;
+    private Double budget;
 }

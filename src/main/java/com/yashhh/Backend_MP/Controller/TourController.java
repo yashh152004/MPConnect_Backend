@@ -25,6 +25,20 @@ public class TourController {
         return ResponseEntity.ok(tourService.createTour(tour));
     }
 
+    // list all tours (any authenticated role)
+    @GetMapping
+    public ResponseEntity<java.util.List<Tour>> getAllTours() {
+        return ResponseEntity.ok(tourService.getAllTours());
+    }
+
+    // get by id
+    @GetMapping("/{id}")
+    public ResponseEntity<Tour> getTourById(@PathVariable Long id) {
+        return tourService.getTourById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
     // 🟠 Upload PHOTO
     @PreAuthorize("hasAnyRole('MP','PA','STAFF')")
     @PostMapping("/{tourId}/photo")

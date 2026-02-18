@@ -1,6 +1,7 @@
 package com.yashhh.Backend_MP.Service;
 
-import java.nio.file.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 
 import org.springframework.security.core.Authentication;
@@ -8,8 +9,13 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.yashhh.Backend_MP.Entity.*;
-import com.yashhh.Backend_MP.Repository.*;
+import com.yashhh.Backend_MP.Entity.MediaType;
+import com.yashhh.Backend_MP.Entity.Tour;
+import com.yashhh.Backend_MP.Entity.TourMedia;
+import com.yashhh.Backend_MP.Entity.User;
+import com.yashhh.Backend_MP.Repository.TourMediaRepository;
+import com.yashhh.Backend_MP.Repository.TourRepository;
+import com.yashhh.Backend_MP.Repository.UserRepository;
 
 @Service
 public class TourService {
@@ -38,6 +44,15 @@ public class TourService {
         tour.setTourDate(LocalDate.now());
 
         return tourRepo.save(tour);
+    }
+
+    // 📥 Retrieve all tours (used by frontend list pages)
+    public java.util.List<Tour> getAllTours() {
+        return tourRepo.findAll();
+    }
+
+    public java.util.Optional<Tour> getTourById(Long id) {
+        return tourRepo.findById(id);
     }
 
     // 🟢 Upload media per tour

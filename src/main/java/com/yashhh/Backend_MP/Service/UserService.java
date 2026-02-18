@@ -1,12 +1,13 @@
 package com.yashhh.Backend_MP.Service;
 
-import com.yashhh.Backend_MP.Entity.User;
-import com.yashhh.Backend_MP.Repository.UserRepository;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
+import com.yashhh.Backend_MP.Entity.User;
+import com.yashhh.Backend_MP.Repository.UserRepository;
 
 @Service
 public class UserService {
@@ -24,6 +25,11 @@ public class UserService {
     public User createUser(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword())); // ✅ FIX
         return userRepository.save(user);
+    }
+
+    // FIND BY EMAIL (used for auth / "me" endpoint)
+    public Optional<User> findByEmail(String email) {
+        return userRepository.findByEmail(email);
     }
 
     // GET ALL

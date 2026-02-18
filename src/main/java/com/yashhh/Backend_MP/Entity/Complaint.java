@@ -36,6 +36,14 @@ public class Complaint {
 
     private String title;
 
+    // new fields used by frontend filters
+    private String category;
+    private String location;
+    private String priority;
+    private String assignedTo;
+    private String staffNotes;
+    private String paInstructions;
+
     @Column(length = 2000)
     private String description;
 
